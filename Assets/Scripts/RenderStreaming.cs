@@ -25,15 +25,45 @@ namespace Unity.RenderStreaming
 
     public class RenderStreaming : MonoBehaviour
     {
-        #pragma warning disable 0649
+
+#pragma warning disable 0649
+
+        [SerializeField, Tooltip("Rate control mode")]
+        private string rateControlMode = "CBR";
+        [SerializeField, Tooltip("Min bitrate in bps (6 - 50mbps) * 10 * 6")] [Range( 6000000, 50000000 )]
+        private int minBitrate = 0;
+        [SerializeField, Tooltip("Max bitrate in bps (6 - 50mbps) * 10 * 6")] [Range(6000000, 50000000)]
+        private int maxBitrate = 50000000;
+        [SerializeField, Tooltip("Width")] [Range(360, 3840)]
+        private int width = 1280;
+        [SerializeField, Tooltip("Height")] [Range(240, 2160)]
+        private int height = 720;
+        [SerializeField, Tooltip("VBR only: 0-51, lower values result in better quality but higher bitrate")] [Range(0,51)]
+        private int minQP = 20;
+        [SerializeField, Tooltip("VBR only: 0-51, lower values result in better quality but higher bitrate")] [Range(0,51)]
+        private int maxQP = 20;
+        [SerializeField, Tooltip("Minimal FPS for quality adaptation")] [Range(10, 30)]
+        private int minFramerate = 30;
+        [SerializeField, Tooltip("Maximum FPS for UnityRenderStreaming")] [Range(30,60)]
+        private int maxFramerate = 30;
+        [SerializeField, Tooltip("Suggest to deprecate in favour of width/height")] [Range(0,1)]
+        private int intraRefreshPeriod = 30;
+        [SerializeField, Tooltip("Error recovery: how often (in FPS) to refresh")] [Range(20,300)]
+        private int intraRefreshCount = 10;
+        [SerializeField, Tooltip("Error recovery: how much to refresh")] [Range(10,300)]
+        private float scaleResolutionDownBy = 1.0f;
+
+
         [SerializeField, Tooltip("Signaling server url")]
-        private string urlSignaling = "http://localhost";
+        private string urlSignaling = "http://localhost"; 
+
 
         [SerializeField, Tooltip("Type of signaling server")]
         private string signalingType = typeof(HttpSignaling).FullName;
 
         [SerializeField, Tooltip("Array to set your own STUN/TURN servers")]
         private RTCIceServer[] iceServers = new RTCIceServer[]
+
         {
             new RTCIceServer()
             {
@@ -69,6 +99,7 @@ namespace Unity.RenderStreaming
         {
             SwitchVideo = 0
         }
+
 
 
         public void Awake()
@@ -111,6 +142,45 @@ namespace Unity.RenderStreaming
             this.m_signaling.Start();
         }
 
+        public void SyncHardwareParameters()
+        {
+            foreach (var item in m_mapTrackAndSenderList)
+            {
+                foreach (var sender in item.Value)
+                {
+                    RTCRtpSendParameters parameters = sender.GetParameters();
+                    foreach (var encoding in parameters.Encodings)
+                    {
+                        encoding.rateControlMode = rateControlMode;
+                        encoding.minBitrate = Convert.ToUInt64(minBitrate);
+                        encoding.maxBitrate = Convert.ToUInt64(maxBitrate);
+                        encoding.width = Convert.ToUInt32(width);
+                        encoding.height = Convert.ToUInt32(height);
+                        encoding.minQP = Convert.ToUInt32(minQP);
+                        encoding.maxQP = Convert.ToUInt32(maxP);
+                        encoding.minFramerate = Convert.ToUInt32(minFramerate);
+                        encoding.maxFramerate = Convert.ToUInt32(maxFramerate);
+
+                        sender.SetHardwareParameters(parameters);
+                    }
+                }
+            }
+        }
+
+        public void ChangeVideoParameters(VideoStreamTrack track, ulong? bitrate, uint? framerate)
+        {
+            foreach (var sender in m_mapTrackAndSenderList[track])
+            {
+                RTCRtpSendParameters parameters = sender.GetParameters();
+                foreach (var encoding in parameters.Encodings)
+                {
+                    if (bitrate != null) encoding.maxBitrate = bitrate;
+                    if (framerate != null) encoding.maxFramerate = framerate;
+                }
+                sender.SetParameters(parameters);
+            }
+        }
+
         public void AddController(SimpleCameraController controller)
         {
             m_listController.Add(controller);
@@ -120,6 +190,30 @@ namespace Unity.RenderStreaming
         public void RemoveController(SimpleCameraController controller)
         {
             m_listController.Remove(controller);
+        }
+
+
+        private bool isChanged = false;
+        private int changeCount = 0;
+
+        private void OnValidate()
+        {
+            isChanged = true;
+
+        }
+
+        private void Update()
+        {
+            if (isChanged)
+            {
+                changeCount += 1;
+                if (changeCount > 100)
+                {
+                    //SyncAllParameters();
+                    changeCount = 0;
+                    isChanged = false;
+                }
+            }
         }
 
         public void AddVideoStreamTrack(VideoStreamTrack track)
@@ -132,19 +226,6 @@ namespace Unity.RenderStreaming
             m_listVideoStreamTrack.Remove(track);
         }
 
-        public void ChangeVideoParameters(VideoStreamTrack track, ulong? bitrate, uint? framerate)
-        {
-            foreach (var sender in m_mapTrackAndSenderList[track])
-            {
-                RTCRtpSendParameters parameters = sender.GetParameters();
-                foreach (var encoding in parameters.Encodings)
-                {
-                    if(bitrate != null) encoding.maxBitrate = bitrate;
-                    if (framerate != null) encoding.maxFramerate = framerate;
-                }
-                sender.SetParameters(parameters);
-            }
-        }
 
         void OnDisable()
         {
@@ -218,6 +299,10 @@ namespace Unity.RenderStreaming
             }
 
             signaling.SendAnswer(connectionId, desc);
+
+            //SyncHardwareParameters();
+
+
         }
 
         void OnIceCandidate(ISignaling signaling, CandidateData e)
