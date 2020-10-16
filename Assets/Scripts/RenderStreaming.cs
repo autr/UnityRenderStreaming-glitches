@@ -31,28 +31,26 @@ namespace Unity.RenderStreaming
 
         [SerializeField, Tooltip("Rate control mode")]
         private int rateControlMode = 0;
-        [SerializeField, Tooltip("Min bitrate in bps (6 - 50mbps) * 10 * 6")] [Range( 6000000, 50000000 )]
-        private int minBitrate = 500000;
-        [SerializeField, Tooltip("Max bitrate in bps (6 - 50mbps) * 10 * 6")] [Range(6000000, 50000000)]
-        private int maxBitrate = 50000000;
         [SerializeField, Tooltip("Width")] [Range(360, 3840)]
         private int width = 1280;
         [SerializeField, Tooltip("Height")] [Range(240, 2160)]
         private int height = 720;
-        [SerializeField, Tooltip("VBR only: 0-51, lower values result in better quality but higher bitrate")] [Range(0,51)]
-        private int minQP = 20;
-        [SerializeField, Tooltip("VBR only: 0-51, lower values result in better quality but higher bitrate")] [Range(0,51)]
-        private int maxQP = 20;
-        [SerializeField, Tooltip("Minimum FPS for UnityRenderStreaming")]
-        [Range(30, 60)]
+        [SerializeField, Tooltip("Target bitrate in bps (6 - 50mbps) * 10 * 6")] [Range( 0, 50000000 )]
+        private int minBitrate = 0;
+        [SerializeField, Tooltip("Max bitrate in bps (6 - 50mbps) * 10 * 6")] [Range(0, 50000000)]
+        private int maxBitrate = 0; 
+        [SerializeField, Tooltip("Target FPS for UnityRenderStreaming")] [Range(10, 60)]
         private int minFramerate = 30;
-        [SerializeField, Tooltip("Maximum FPS for UnityRenderStreaming")]
-        [Range(30, 60)]
+        [SerializeField, Tooltip("Maximum FPS for UnityRenderStreaming")] [Range(10, 60)]
         private int maxFramerate = 30;
-        [SerializeField, Tooltip("Error recovery: how often (in FPS) to refresh")] [Range(10,300)]
-        private int intraRefreshPeriod = 30;
-        [SerializeField, Tooltip("Error recovery: how much to refresh")] [Range(10,300)]
-        private int intraRefreshCount = 10;
+        [SerializeField, Tooltip("VBR only: 0-51, lower values result in better quality but higher bitrate")] [Range(0,51)]
+        private int minQP = 0;
+        [SerializeField, Tooltip("VBR only: 0-51, lower values result in better quality but higher bitrate")] [Range(0,51)]
+        private int maxQP = 0;
+        [SerializeField, Tooltip("Error recovery: how often (in FPS) to refresh")] [Range(0,300)]
+        private int intraRefreshPeriod = 0;
+        [SerializeField, Tooltip("Error recovery: how much to refresh")] [Range(0,300)]
+        private int intraRefreshCount = 0;
         [SerializeField, Tooltip("Optimise: adaptive quality")] 
         private bool enableAQ = false;
         [SerializeField, Tooltip("Optimise: maxNumRefFrames")] 

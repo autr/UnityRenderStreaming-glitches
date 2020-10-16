@@ -16,10 +16,10 @@ public class RenderStreamingEditor : Editor
 
             ShowRateControlTypes(serializedObject.FindProperty("rateControlMode"));
             // EditorGUILayout.PropertyField(serializedObject.FindProperty("rateControlMode"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("width"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("height"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("minBitrate"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxBitrate"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("width"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("height"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("minFramerate"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxFramerate"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("minQP"));
