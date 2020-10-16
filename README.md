@@ -9,7 +9,7 @@ Links:
 
 ## Overview
 
-`RenderStreaming.cs` script exposes GUI parameters sync'd to a singleton object inside `HWSettings` C++ plugin. These settings are used during initialisation of the `NvEncoder.cpp` encoder, so the scene must be stopped/started for new changes to take effect.
+`RenderStreaming.cs` script exposes GUI parameters sync'd to a singleton object inside `HWSettings` C++ plugin. These settings are used during initialisation of the `NvEncoder.cpp` encoder only, so the scene must be stopped/started for new changes to take effect.
 
 `RenderStreamDebugger.cs` logs out the bitrate and framerate called in `NvEncoder::UpdateSettings` requested by the `libwebrtc` connection in `DummyVideoEncoder.cpp`. These are useful to see how the encoder and webrtc connection respond to different settings (see also notes of FPS below).
 
@@ -30,7 +30,7 @@ Constant is the recommended default for low-latency streaming.
 
 **only set if: `> 0`**
 
-Variously used by all rate control modes, as **average** and **target** bitrate depending on which one.
+Variously used by all rate control modes, as **average** and **target** bitrate depending on which one. Setting a low bitrate here seems to work well when used with Intra Refresh.
 
 `NV_ENC_RC_PARAMS::averageBitRate`
 
@@ -95,11 +95,14 @@ intraRefreshCnt determines the number of frames over which the intra refresh wil
 Recommended settings to try:
 
 ```
+Period = 90
+Count = 40
+
 Period = 60
 Count = 40
 
 Period = 30
-Count = 20
+Count = 10
 
 etc...
 ```
@@ -130,7 +133,7 @@ Changes `gopLength` from framerate to `NVENC_INFINITE_GOPLENGTH` - a recommended
 
 ## Notes
 
-Framerates
+**Framerates**
 
 Observing the incoming FPS from WebRTC in `RenderStreamDebugger.cs` and we average 60 FPS. Setting FPS instead via the WebRTC initialisation (`webrtc::VideoCodec::maxFramerate`), or via NVIDIA encoder initialisation or update (`NV_ENC_INITIALIZE_PARAMS::frameRateNum`) and more glitches / unusual behaviour are produced. Needs more investigation.
 
