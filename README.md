@@ -1,11 +1,6 @@
 # Unity HDR WebRTC Example
 
-Example project for testing HDR render streaming and fork with exposed NVIDIA API controls. To clone repo use:
-
-```
-git clone --recursive https://github.com/autr/UnityRenderStreaming-glitches
-git submodule init && git submodule update
-```
+Example project for testing HDR render streaming and fork with exposed NVIDIA API controls.
 
 Links:
 
