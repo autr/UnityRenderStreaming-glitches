@@ -7,6 +7,7 @@ using Unity.WebRTC;
 using System.Text.RegularExpressions;
 using Unity.RenderStreaming.Signaling;
 using UnityEngine.InputSystem.EnhancedTouch;
+using System.Runtime.InteropServices;
 
 namespace Unity.RenderStreaming
 {
@@ -29,9 +30,9 @@ namespace Unity.RenderStreaming
 #pragma warning disable 0649
 
         [SerializeField, Tooltip("Rate control mode")]
-        private string rateControlMode = "CBR";
+        private int rateControlMode = 0;
         [SerializeField, Tooltip("Min bitrate in bps (6 - 50mbps) * 10 * 6")] [Range( 6000000, 50000000 )]
-        private int minBitrate = 0;
+        private int minBitrate = 500000;
         [SerializeField, Tooltip("Max bitrate in bps (6 - 50mbps) * 10 * 6")] [Range(6000000, 50000000)]
         private int maxBitrate = 50000000;
         [SerializeField, Tooltip("Width")] [Range(360, 3840)]
@@ -42,15 +43,23 @@ namespace Unity.RenderStreaming
         private int minQP = 20;
         [SerializeField, Tooltip("VBR only: 0-51, lower values result in better quality but higher bitrate")] [Range(0,51)]
         private int maxQP = 20;
-        [SerializeField, Tooltip("Minimal FPS for quality adaptation")] [Range(10, 30)]
+        [SerializeField, Tooltip("Minimum FPS for UnityRenderStreaming")]
+        [Range(30, 60)]
         private int minFramerate = 30;
-        [SerializeField, Tooltip("Maximum FPS for UnityRenderStreaming")] [Range(30,60)]
+        [SerializeField, Tooltip("Maximum FPS for UnityRenderStreaming")]
+        [Range(30, 60)]
         private int maxFramerate = 30;
-        [SerializeField, Tooltip("Suggest to deprecate in favour of width/height")] [Range(0,1)]
+        [SerializeField, Tooltip("Error recovery: how often (in FPS) to refresh")] [Range(10,300)]
         private int intraRefreshPeriod = 30;
-        [SerializeField, Tooltip("Error recovery: how often (in FPS) to refresh")] [Range(20,300)]
-        private int intraRefreshCount = 10;
         [SerializeField, Tooltip("Error recovery: how much to refresh")] [Range(10,300)]
+        private int intraRefreshCount = 10;
+        [SerializeField, Tooltip("Optimise: adaptive quality")] 
+        private bool AQ = false;
+        [SerializeField, Tooltip("Optimise: maxNumRefFrames")] 
+        private int maxNumRefFrames = 0;
+        [SerializeField, Tooltip("Optimise: infinite gop length")] 
+        private bool GOP = false;
+
         private float scaleResolutionDownBy = 1.0f;
 
 
@@ -101,9 +110,9 @@ namespace Unity.RenderStreaming
         }
 
 
-
         public void Awake()
         {
+            SyncHardwareParameters();
             Instance = this;
             var encoderType = hardwareEncoderSupport ? EncoderType.Hardware : EncoderType.Software;
             WebRTC.WebRTC.Initialize(encoderType);
@@ -121,11 +130,13 @@ namespace Unity.RenderStreaming
         }
         public void Start()
         {
+            SyncHardwareParameters();
             m_audioStream = Unity.WebRTC.Audio.CaptureStream();
 
             m_conf = default;
             m_conf.iceServers = iceServers;
             StartCoroutine(WebRTC.WebRTC.Update());
+            SyncHardwareParameters();
         }
 
         void OnEnable()
@@ -144,27 +155,28 @@ namespace Unity.RenderStreaming
 
         public void SyncHardwareParameters()
         {
-            foreach (var item in m_mapTrackAndSenderList)
-            {
-                foreach (var sender in item.Value)
-                {
-                    RTCRtpSendParameters parameters = sender.GetParameters();
-                    foreach (var encoding in parameters.Encodings)
-                    {
-                        encoding.rateControlMode = rateControlMode;
-                        encoding.minBitrate = Convert.ToUInt64(minBitrate);
-                        encoding.maxBitrate = Convert.ToUInt64(maxBitrate);
-                        encoding.width = Convert.ToUInt32(width);
-                        encoding.height = Convert.ToUInt32(height);
-                        encoding.minQP = Convert.ToUInt32(minQP);
-                        encoding.maxQP = Convert.ToUInt32(maxP);
-                        encoding.minFramerate = Convert.ToUInt32(minFramerate);
-                        encoding.maxFramerate = Convert.ToUInt32(maxFramerate);
 
-                        sender.SetHardwareParameters(parameters);
-                    }
-                }
-            }
+
+            RTCRtpEncodingParametersInternal p = default;
+
+            p.active = true;
+            p.rateControlMode = Convert.ToUInt32(rateControlMode);
+            p.minBitrate = Convert.ToUInt64(minBitrate);
+            p.maxBitrate = Convert.ToUInt64(maxBitrate);
+            p.width = Convert.ToUInt32(width);
+            p.height = Convert.ToUInt32(height);
+            p.minQP = Convert.ToUInt32(minQP);
+            p.maxQP = Convert.ToUInt32(maxQP);
+            p.minFramerate = Convert.ToUInt32(minFramerate);
+            p.maxFramerate = Convert.ToUInt32(maxFramerate);
+            p.intraRefreshPeriod = Convert.ToUInt32(intraRefreshPeriod);
+            p.intraRefreshCount = Convert.ToUInt32(intraRefreshCount);
+            //p.AQ = AQ;
+            //p.maxNumRefFrames = Convert.ToUInt32(maxNumRefFrames);
+            //p.GOP = GOP;
+
+            RTCRtpSender s = new RTCRtpSender();
+            s.SetHardwareParameters(p);
         }
 
         public void ChangeVideoParameters(VideoStreamTrack track, ulong? bitrate, uint? framerate)
@@ -218,6 +230,7 @@ namespace Unity.RenderStreaming
 
         public void AddVideoStreamTrack(VideoStreamTrack track)
         {
+
             m_listVideoStreamTrack.Add(track);
         }
 
@@ -300,7 +313,6 @@ namespace Unity.RenderStreaming
 
             signaling.SendAnswer(connectionId, desc);
 
-            //SyncHardwareParameters();
 
 
         }

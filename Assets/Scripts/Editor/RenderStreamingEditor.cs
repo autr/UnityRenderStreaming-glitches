@@ -14,7 +14,8 @@ public class RenderStreamingEditor : Editor
             ShowSignalingTypes(serializedObject.FindProperty("signalingType"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("urlSignaling"));
 
-            ShowRateControlTypes(serializedObject.FindProperty("rateControlMode"));
+            //ShowRateControlTypes(serializedObject.FindProperty("rateControlMode"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("rateControlMode"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("width"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("height"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("minBitrate"));
@@ -25,7 +26,10 @@ public class RenderStreamingEditor : Editor
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxQP"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("intraRefreshPeriod"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("intraRefreshCount"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("scaleResolutionDownBy"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("AQ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("maxNumRefFrames"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("GOP"));
+            //EditorGUILayout.PropertyField(serializedObject.FindProperty("scaleResolutionDownBy"));
 
 
             ShowIceServerList(serializedObject.FindProperty("iceServers"));
@@ -63,13 +67,8 @@ public class RenderStreamingEditor : Editor
     {
 
         List<string> options = new List<string> { "Constant", "Constant Low Delay HQ", "Constant QP", "Constant HQ", "Variable" };
-        List<string> types = new List<string> { "CBR", "CBR_LOWDELAY_HQ", "CONSTQP", "CBR_HQ", "VBR" };
 
-        int selected = types.IndexOf(rateControlMode.stringValue);
-        if (selected < 0) selected = 0;
-
-        selected = EditorGUILayout.Popup("Rate control mode", selected, options.ToArray());
-        rateControlMode.stringValue = types[selected]; 
+        rateControlMode.intValue = EditorGUILayout.Popup("Rate control mode", rateControlMode.intValue, options.ToArray());
 
     }
     static void ShowSignalingTypes(SerializedProperty signalingType){
