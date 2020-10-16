@@ -35,9 +35,9 @@ namespace Unity.RenderStreaming
         private int width = 1280;
         [SerializeField, Tooltip("Height")] [Range(240, 2160)]
         private int height = 720;
-        [SerializeField, Tooltip("Target bitrate in bps (6 - 50mbps) * 10 * 6")] [Range( 0, 50000000 )]
+        [SerializeField, Tooltip("Target bitrate in bps (6 - 50mbps) * 10 * 6")] 
         private int minBitrate = 0;
-        [SerializeField, Tooltip("Max bitrate in bps (6 - 50mbps) * 10 * 6")] [Range(0, 50000000)]
+        [SerializeField, Tooltip("Max bitrate in bps (6 - 50mbps) * 10 * 6")] 
         private int maxBitrate = 0; 
         [SerializeField, Tooltip("Target FPS for UnityRenderStreaming")] [Range(10, 60)]
         private int minFramerate = 30;
@@ -47,9 +47,9 @@ namespace Unity.RenderStreaming
         private int minQP = 0;
         [SerializeField, Tooltip("VBR only: 0-51, lower values result in better quality but higher bitrate")] [Range(0,51)]
         private int maxQP = 0;
-        [SerializeField, Tooltip("Error recovery: how often (in FPS) to refresh")] [Range(0,300)]
+        [SerializeField, Tooltip("Error recovery: how often (in FPS) to refresh")]
         private int intraRefreshPeriod = 0;
-        [SerializeField, Tooltip("Error recovery: how much to refresh")] [Range(0,300)]
+        [SerializeField, Tooltip("Error recovery: how much to refresh")]
         private int intraRefreshCount = 0;
         [SerializeField, Tooltip("Optimise: adaptive quality")] 
         private bool enableAQ = false;
