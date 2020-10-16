@@ -54,11 +54,11 @@ namespace Unity.RenderStreaming
         [SerializeField, Tooltip("Error recovery: how much to refresh")] [Range(10,300)]
         private int intraRefreshCount = 10;
         [SerializeField, Tooltip("Optimise: adaptive quality")] 
-        private bool AQ = false;
+        private bool enableAQ = false;
         [SerializeField, Tooltip("Optimise: maxNumRefFrames")] 
         private int maxNumRefFrames = 0;
         [SerializeField, Tooltip("Optimise: infinite gop length")] 
-        private bool GOP = false;
+        private bool infiniteGOP = false;
 
         private float scaleResolutionDownBy = 1.0f;
 
@@ -130,13 +130,11 @@ namespace Unity.RenderStreaming
         }
         public void Start()
         {
-            SyncHardwareParameters();
             m_audioStream = Unity.WebRTC.Audio.CaptureStream();
 
             m_conf = default;
             m_conf.iceServers = iceServers;
             StartCoroutine(WebRTC.WebRTC.Update());
-            SyncHardwareParameters();
         }
 
         void OnEnable()
@@ -171,9 +169,9 @@ namespace Unity.RenderStreaming
             p.maxFramerate = Convert.ToUInt32(maxFramerate);
             p.intraRefreshPeriod = Convert.ToUInt32(intraRefreshPeriod);
             p.intraRefreshCount = Convert.ToUInt32(intraRefreshCount);
-            //p.AQ = AQ;
-            //p.maxNumRefFrames = Convert.ToUInt32(maxNumRefFrames);
-            //p.GOP = GOP;
+            p.enableAQ = enableAQ;
+            p.maxNumRefFrames = Convert.ToUInt32(maxNumRefFrames);
+            p.infiniteGOP = infiniteGOP;
 
             RTCRtpSender s = new RTCRtpSender();
             s.SetHardwareParameters(p);

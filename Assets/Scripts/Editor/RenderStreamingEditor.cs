@@ -14,8 +14,8 @@ public class RenderStreamingEditor : Editor
             ShowSignalingTypes(serializedObject.FindProperty("signalingType"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("urlSignaling"));
 
-            //ShowRateControlTypes(serializedObject.FindProperty("rateControlMode"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("rateControlMode"));
+            ShowRateControlTypes(serializedObject.FindProperty("rateControlMode"));
+            // EditorGUILayout.PropertyField(serializedObject.FindProperty("rateControlMode"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("width"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("height"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("minBitrate"));
@@ -26,9 +26,9 @@ public class RenderStreamingEditor : Editor
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxQP"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("intraRefreshPeriod"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("intraRefreshCount"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("AQ"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableAQ"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("maxNumRefFrames"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("GOP"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("infiniteGOP"));
             //EditorGUILayout.PropertyField(serializedObject.FindProperty("scaleResolutionDownBy"));
 
 
